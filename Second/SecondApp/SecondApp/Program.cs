@@ -1,5 +1,4 @@
 ﻿using SecondApp;
-using System;
 using System.Text.Json;
 
 const string FileName = "Cities.txt";
@@ -21,9 +20,35 @@ async Task MainAsync()
 
     var results = await Task.WhenAll(tasks); // будем надеяться и верить, что городов, как и в примере, будет пять штук
     var weatherData = results.OfType<WeatherData>().ToList();
+
+    PrintAllInfo(weatherData);
+    Console.WriteLine();
+    PrintStatistics(weatherData);
 }
 
-async Task<WeatherData> GetData(string cityName)
+void PrintAllInfo(List<WeatherData> weatherData)
+{
+    foreach (var item in weatherData)
+    {
+        Console.WriteLine($"{item.CityName}, {item.CountryName}, {item.TemperatureCelcius} °C");
+    }
+}
+
+void PrintStatistics(List<WeatherData> weatherDatas)
+{
+    foreach(var countryGrouped in weatherDatas.GroupBy(t => t.CountryName))
+    {
+        var countryName = countryGrouped.Key;
+        var citiesAmount = countryGrouped.Count();
+        var average = countryGrouped.Average(t => t.TemperatureCelcius);
+        var min = countryGrouped.Min(t => t.TemperatureCelcius);
+        var max = countryGrouped.Max(t => t.TemperatureCelcius);
+
+        Console.WriteLine($"{countryName} - {citiesAmount} cities, avg {average}°C, min: {min}°C, max:{max}°C");
+    }
+}
+
+async Task<WeatherData?> GetData(string cityName)
 {
     var api = ApiAdress.Replace("CITY", cityName);
 
